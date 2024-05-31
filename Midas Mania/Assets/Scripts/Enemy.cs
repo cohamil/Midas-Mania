@@ -41,21 +41,38 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    public void ChangeState(CopState newState) {
+    public void ChangeState(CopState newState)
+    {
         currentState = newState;
     }
 
+    public Transform[] patrolPoints; // An array of patrol points
+    private int currentPatrolPoint = 0; // Index of the current patrol point
+
     void UpdatePatrolState()
     {
-        // Implement patrol behavior here
-        // ...
+        // Check if we have patrol points
+        if (patrolPoints.Length > 0)
+        {
+            // Set the current patrol point as the destination for the NavMeshAgent
+            agent.SetDestination(patrolPoints[currentPatrolPoint].position);
 
-        // Check if the player is within the flashlight cone
-        // Vector3 dirToPlayer = playerTransform.position - transform.position;
-        // if (Vector3.Angle(dirToPlayer, transform.up) < viewAngle / 2 && dirToPlayer.magnitude < viewDistance)
-        // {
-        //     currentState = CopState.ChasePlayer;
-        // }
+            // Calculate the direction to the next patrol point
+            Vector3 dirToNextPoint = agent.destination - transform.position;
+
+            // Rotate the cop to face the direction it's moving (2D)
+            float angle = Mathf.Atan2(dirToNextPoint.y, dirToNextPoint.x) * Mathf.Rad2Deg;
+            transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+
+            // Check if we have reached the current patrol point
+            if (agent.remainingDistance <= agent.stoppingDistance)
+            {
+                // Move to the next patrol point
+                currentPatrolPoint = (currentPatrolPoint + 1) % patrolPoints.Length;
+            }
+        }
+
+
     }
 
     void UpdateChasePlayerState()
@@ -102,5 +119,5 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    
+
 }
