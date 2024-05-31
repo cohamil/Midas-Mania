@@ -41,17 +41,21 @@ public class Enemy : MonoBehaviour
         }
     }
 
+    public void ChangeState(CopState newState) {
+        currentState = newState;
+    }
+
     void UpdatePatrolState()
     {
         // Implement patrol behavior here
         // ...
 
         // Check if the player is within the flashlight cone
-        Vector3 dirToPlayer = playerTransform.position - transform.position;
-        if (Vector3.Angle(dirToPlayer, transform.up) < viewAngle / 2 && dirToPlayer.magnitude < viewDistance)
-        {
-            currentState = CopState.ChasePlayer;
-        }
+        // Vector3 dirToPlayer = playerTransform.position - transform.position;
+        // if (Vector3.Angle(dirToPlayer, transform.up) < viewAngle / 2 && dirToPlayer.magnitude < viewDistance)
+        // {
+        //     currentState = CopState.ChasePlayer;
+        // }
     }
 
     void UpdateChasePlayerState()
@@ -97,4 +101,6 @@ public class Enemy : MonoBehaviour
             currentState = CopState.ChasePlayer;
         }
     }
+
+    
 }
