@@ -88,7 +88,7 @@ public class Enemy : MonoBehaviour
         Quaternion targetRotation = Quaternion.AngleAxis(angle, Vector3.forward);
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 5f);
 
-        // Check if the player is out of the flashlight cone
+        /*// Check if the player is out of the flashlight cone
         if (Vector3.Angle(dirToPlayer, transform.up) >= viewAngle / 2 || dirToPlayer.magnitude >= viewDistance)
         {
             // Don't transition to Investigate state if already chasing
@@ -104,7 +104,7 @@ public class Enemy : MonoBehaviour
             {
                 currentState = CopState.ChasePlayer;
             }
-        }
+        }*/
     }
     void UpdateInvestigateState()
     {
