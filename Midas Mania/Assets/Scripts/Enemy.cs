@@ -18,6 +18,12 @@ public class Enemy : MonoBehaviour
     private CopState currentState = CopState.Patrol; // Initial state
     private NavMeshAgent agent; // Reference to the NavMeshAgent component
 
+    private float investigationDuration = 5f; // Duration of the investigation phase
+    private float investigationTimer = 0f; // Timer for the investigation phase
+
+    public float range = 10f; // Radius of the patrol area
+    public Transform centrePoint; // Centre of the patrol area
+
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -44,80 +50,113 @@ public class Enemy : MonoBehaviour
     public void ChangeState(CopState newState)
     {
         currentState = newState;
+        investigationTimer = 0f;
     }
-
-    public Transform[] patrolPoints; // An array of patrol points
-    private int currentPatrolPoint = 0; // Index of the current patrol point
 
     void UpdatePatrolState()
     {
-        // Check if we have patrol points
-        if (patrolPoints.Length > 0)
+        Debug.Log("updatepatrolstate");
+
+        if (agent.remainingDistance <= agent.stoppingDistance)
         {
-            // Set the current patrol point as the destination for the NavMeshAgent
-            agent.SetDestination(patrolPoints[currentPatrolPoint].position);
-
-            // Calculate the direction to the next patrol point
-            Vector3 dirToNextPoint = agent.destination - transform.position;
-
-            // Rotate the cop to face the direction it's moving (2D)
-            float angle = Mathf.Atan2(dirToNextPoint.y, dirToNextPoint.x) * Mathf.Rad2Deg;
-            transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
-
-            // Check if we have reached the current patrol point
-            if (agent.remainingDistance <= agent.stoppingDistance)
+            Vector3 point;
+            if (RandomPoint(centrePoint.position, range, out point))
             {
-                // Move to the next patrol point
-                currentPatrolPoint = (currentPatrolPoint + 1) % patrolPoints.Length;
+                Debug.DrawRay(point, Vector3.up, Color.blue, 1.0f);
+                agent.SetDestination(point);
             }
         }
-
-
     }
 
     void UpdateChasePlayerState()
     {
-        // Set the player's position as the destination for the NavMeshAgent
+        Debug.Log("updatechaseplayerstate");
         agent.SetDestination(playerTransform.position);
 
-        // Calculate the direction to the player
-        Vector3 dirToPlayer = playerTransform.position - transform.position;
+        Vector2 dirToPlayer = playerTransform.position - transform.position;
 
-        // Rotate the enemy to face the player (2D)
         float angle = Mathf.Atan2(dirToPlayer.y, dirToPlayer.x) * Mathf.Rad2Deg;
-        Quaternion targetRotation = Quaternion.AngleAxis(angle, Vector3.forward);
-        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 5f);
+        transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
 
-        /*// Check if the player is out of the flashlight cone
-        if (Vector3.Angle(dirToPlayer, transform.up) >= viewAngle / 2 || dirToPlayer.magnitude >= viewDistance)
+        float angleToPlayer = Vector2.Angle(transform.up, dirToPlayer);
+        if (angleToPlayer >= viewAngle / 2 || dirToPlayer.magnitude >= viewDistance)
         {
-            // Don't transition to Investigate state if already chasing
-            if (currentState != CopState.ChasePlayer)
+            if (currentState == CopState.ChasePlayer)
             {
                 currentState = CopState.Investigate;
             }
         }
         else
         {
-            // If the player re-enters the flashlight cone during the chase, reset the state to ChasePlayer
             if (currentState == CopState.Investigate)
             {
                 currentState = CopState.ChasePlayer;
             }
-        }*/
-    }
-    void UpdateInvestigateState()
-    {
-        // Implement investigate behavior here
-        // ...
-
-        // Check if the player is back within the flashlight cone
-        Vector3 dirToPlayer = playerTransform.position - transform.position;
-        if (Vector3.Angle(dirToPlayer, transform.up) < viewAngle / 2 && dirToPlayer.magnitude < viewDistance)
-        {
-            currentState = CopState.ChasePlayer;
         }
     }
 
+    private Vector2 lastKnownPlayerPosition;
 
+    void UpdateInvestigateState()
+    {
+        Debug.Log("updateinvestigatestate");
+        investigatePlayer();
+
+        Vector2 dirToPlayer = playerTransform.position - transform.position;
+        float angleToPlayer = Vector2.Angle(transform.up, dirToPlayer);
+        if (angleToPlayer < viewAngle / 2 && dirToPlayer.magnitude < viewDistance)
+        {
+            currentState = CopState.ChasePlayer;
+            investigationTimer = 0f;
+        }
+        else
+        {
+            investigationTimer += Time.deltaTime;
+
+            if (investigationTimer >= investigationDuration)
+            {
+                currentState = CopState.Patrol;
+                investigationTimer = 0f;
+            }
+        }
+    }
+
+    public GameObject questionMarkObject;
+
+    void investigatePlayer()
+    {
+        Debug.Log("investigating");
+
+        if (currentState == CopState.Investigate)
+        {
+            lastKnownPlayerPosition = playerTransform.position;
+            questionMarkObject.SetActive(true);
+        }
+        else if (currentState != CopState.Investigate)
+        {
+            questionMarkObject.SetActive(false);
+        }
+
+        agent.SetDestination(lastKnownPlayerPosition);
+
+        Vector2 dirToLastKnownPosition = lastKnownPlayerPosition - (Vector2)transform.position;
+        float angle = Mathf.Atan2(dirToLastKnownPosition.y, dirToLastKnownPosition.x) * Mathf.Rad2Deg;
+        transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+
+        transform.Rotate(Vector3.forward * Time.deltaTime * 30f);
+    }
+
+    bool RandomPoint(Vector3 center, float range, out Vector3 result)
+    {
+        Vector3 randomPoint = center + Random.insideUnitSphere * range;
+        NavMeshHit hit;
+        if (NavMesh.SamplePosition(randomPoint, out hit, 1.0f, NavMesh.AllAreas))
+        {
+            result = hit.position;
+            return true;
+        }
+
+        result = Vector3.zero;
+        return false;
+    }
 }
