@@ -19,24 +19,32 @@ public class Flashlight : MonoBehaviour
         Debug.DrawLine(Enemy.transform.position, transform.position + transform.up);
     }
 
-    private void OnTriggerStay2D(Collider2D other){
-        if (other.transform.tag == "Player"){
+    private void OnTriggerStay2D(Collider2D other)
+    {
+        if (other.transform.tag == "Player")
+        {
             hit = Physics2D.Raycast(Enemy.transform.position, transform.up, enemyScript.viewDistance);
-            if(hit.collider != null){
+            if (hit.collider != null)
+            {
                 //Debug.Log("raycasted something: " + hit.collider.tag);
-                if (hit.collider.tag == "Player"){
+                if (hit.collider.tag == "Player")
+                {
                     //Debug.Log("player detected");
                     enemyScript.ChangeState(CopState.ChasePlayer);
                 }
-            }else{
+            }
+            else
+            {
                 //Debug.Log("player detected");
                 enemyScript.ChangeState(CopState.ChasePlayer);
             }
         }
     }
 
-    private void OnTriggerExit2D(Collider2D other){
-        if (other.transform.tag == "Player"){
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        if (other.transform.tag == "Player")
+        {
             enemyScript.ChangeState(CopState.Patrol); // should be investiage state, but patrol for now
         }
     }
