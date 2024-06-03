@@ -55,7 +55,7 @@ public class Enemy : MonoBehaviour
 
     void UpdatePatrolState()
     {
-        Debug.Log("updatepatrolstate");
+        //Debug.Log("updatepatrolstate");
 
         if (agent.remainingDistance <= agent.stoppingDistance)
         {
@@ -76,7 +76,7 @@ public class Enemy : MonoBehaviour
 
     void UpdateChasePlayerState()
     {
-        Debug.Log("updatechaseplayerstate");
+        //Debug.Log("updatechaseplayerstate");
         agent.SetDestination(playerTransform.position);
 
         Vector2 dirToPlayer = playerTransform.position - transform.position;
@@ -105,7 +105,7 @@ public class Enemy : MonoBehaviour
 
     void UpdateInvestigateState()
     {
-        Debug.Log("updateinvestigatestate");
+        //Debug.Log("updateinvestigatestate");
         investigatePlayer();
 
         Vector2 dirToPlayer = playerTransform.position - transform.position;
@@ -129,7 +129,7 @@ public class Enemy : MonoBehaviour
 
     void investigatePlayer()
     {
-        Debug.Log("investigating");
+        //Debug.Log("investigating");
 
         if (currentState == CopState.Investigate)
         {
