@@ -66,6 +66,12 @@ public class Enemy : MonoBehaviour
                 agent.SetDestination(point);
             }
         }
+
+        if (agent.velocity != Vector3.zero)
+        {
+            float angle = Mathf.Atan2(agent.velocity.y, agent.velocity.x) * Mathf.Rad2Deg;
+            transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+        }
     }
 
     void UpdateChasePlayerState()
@@ -121,8 +127,6 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    public GameObject questionMarkObject;
-
     void investigatePlayer()
     {
         Debug.Log("investigating");
@@ -130,11 +134,8 @@ public class Enemy : MonoBehaviour
         if (currentState == CopState.Investigate)
         {
             lastKnownPlayerPosition = playerTransform.position;
-            questionMarkObject.SetActive(true);
-        }
-        else if (currentState != CopState.Investigate)
-        {
-            questionMarkObject.SetActive(false);
+            centrePoint.position = lastKnownPlayerPosition; // Set the center point position to the last known player position
+
         }
 
         agent.SetDestination(lastKnownPlayerPosition);
