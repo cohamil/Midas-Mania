@@ -70,7 +70,7 @@ public class Enemy : MonoBehaviour
         if (agent.velocity != Vector3.zero)
         {
             float angle = Mathf.Atan2(agent.velocity.y, agent.velocity.x) * Mathf.Rad2Deg;
-            transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+            transform.rotation = Quaternion.AngleAxis(angle - 90, Vector3.forward);
         }
     }
 
@@ -82,7 +82,7 @@ public class Enemy : MonoBehaviour
         Vector2 dirToPlayer = playerTransform.position - transform.position;
 
         float angle = Mathf.Atan2(dirToPlayer.y, dirToPlayer.x) * Mathf.Rad2Deg;
-        transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+        transform.rotation = Quaternion.AngleAxis(angle - 90, Vector3.forward);
 
         float angleToPlayer = Vector2.Angle(transform.up, dirToPlayer);
         if (angleToPlayer >= viewAngle / 2 || dirToPlayer.magnitude >= viewDistance)
@@ -142,7 +142,7 @@ public class Enemy : MonoBehaviour
 
         Vector2 dirToLastKnownPosition = lastKnownPlayerPosition - (Vector2)transform.position;
         float angle = Mathf.Atan2(dirToLastKnownPosition.y, dirToLastKnownPosition.x) * Mathf.Rad2Deg;
-        transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+        transform.rotation = Quaternion.AngleAxis(angle - 90, Vector3.forward);
 
         transform.Rotate(Vector3.forward * Time.deltaTime * 30f);
     }
