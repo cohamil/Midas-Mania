@@ -142,7 +142,7 @@ public class Enemy : MonoBehaviour
 
         Vector2 dirToLastKnownPosition = lastKnownPlayerPosition - (Vector2)transform.position;
         float angle = Mathf.Atan2(dirToLastKnownPosition.y, dirToLastKnownPosition.x) * Mathf.Rad2Deg;
-        transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+        transform.rotation = Quaternion.AngleAxis(angle - 90, Vector3.forward);
 
         transform.Rotate(Vector3.forward * Time.deltaTime * 30f);
     }
