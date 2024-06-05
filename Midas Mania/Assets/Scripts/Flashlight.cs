@@ -29,13 +29,13 @@ public class Flashlight : MonoBehaviour
                 //Debug.Log("raycasted something: " + hit.collider.tag);
                 if (hit.collider.tag == "Player")
                 {
-                    //Debug.Log("player detected");
+                    Debug.Log("player detected");
                     enemyScript.ChangeState(CopState.ChasePlayer);
                 }
             }
             else
             {
-                //Debug.Log("player detected");
+                Debug.Log("player detected2");
                 enemyScript.ChangeState(CopState.ChasePlayer);
             }
         }
