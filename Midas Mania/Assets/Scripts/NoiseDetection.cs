@@ -17,7 +17,9 @@ public class NoiseDetection : MonoBehaviour
     }
     private void OnTriggerEnter2D(Collider2D other) {
         if (other.tag == "Enemy") {
-            other.transform.parent.GetComponent<Enemy>().ChangeState(CopState.Investigate);
+            Enemy enemy = other.transform.parent.GetComponent<Enemy>();
+            
+            enemy.InvestigateSound(transform.position);
         }
     }
 }

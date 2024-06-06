@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject player;
     [SerializeField] public int playerLives = 3;
     [SerializeField] private GameObject Goal;
+    [SerializeField] private GameObject Gold;
 
     private Vector2 playerStartPos;
 
@@ -27,8 +28,7 @@ public class GameManager : MonoBehaviour
     {
         playerWin = false;
         goldCollected = false;
-        if (player == null)
-        {
+        if (player == null) {
             player = GameObject.FindGameObjectWithTag("Player").gameObject;
         }
         playerStartPos = player.transform.position;
@@ -37,31 +37,30 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        
     }
 
-    public void PlayerCollectedGold()
-    {
+    public void PlayerCollectedGold() {
         goldCollected = true;
         Goal.GetComponent<Goal>().AllowPlayerToLeave();
+        Gold.SetActive(false);
 
     }
 
-    public void PlayerLostLife()
-    {
+    public void PlayerLostLife() {
         playerLives -= 1;
-        if (playerLives <= 0)
-        {
+        if (playerLives <= 0) {
             PlayerDied();
         }
         else
         {
+            if (goldCollected) goldCollected = false;
+            Gold.SetActive(true);
             player.transform.position = playerStartPos;
         }
     }
 
-    private void PlayerDied()
-    {
+    private void PlayerDied() {
         Debug.Log("dead");
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }

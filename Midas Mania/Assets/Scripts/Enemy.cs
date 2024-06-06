@@ -1,3 +1,5 @@
+//using System.Numerics;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -18,21 +20,25 @@ public class Enemy : MonoBehaviour
     private CopState currentState = CopState.Patrol; // Initial state
     private NavMeshAgent agent; // Reference to the NavMeshAgent component
 
-    private float investigationDuration = 5f; // Duration of the investigation phase
-    private float investigationTimer = 0f; // Timer for the investigation phase
+    private float investigationDuration = 2f; // Duration of the investigation phase
 
     public float range = 10f; // Radius of the patrol area
     public Transform centrePoint; // Centre of the patrol area
+
+    private int knownLives;
 
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
         agent.updateRotation = false;
         agent.updateUpAxis = false;
+
+        knownLives = GameManager.Instance.playerLives;
     }
 
     void Update()
     {
+        //Debug.Log(knownLives);
         switch (currentState)
         {
             case CopState.Patrol:
@@ -50,7 +56,6 @@ public class Enemy : MonoBehaviour
     public void ChangeState(CopState newState)
     {
         currentState = newState;
-        investigationTimer = 0f;
     }
 
     void UpdatePatrolState()
@@ -70,73 +75,58 @@ public class Enemy : MonoBehaviour
         if (agent.velocity != Vector3.zero)
         {
             float angle = Mathf.Atan2(agent.velocity.y, agent.velocity.x) * Mathf.Rad2Deg;
-            transform.rotation = Quaternion.AngleAxis(angle - 90, Vector3.forward);
+            transform.rotation = Quaternion.AngleAxis(angle-90, Vector3.forward);
         }
     }
 
     void UpdateChasePlayerState()
     {
+        if (knownLives > GameManager.Instance.playerLives) {
+            knownLives = GameManager.Instance.playerLives;
+            currentState = CopState.Patrol;
+            return;
+        }
+        
         //Debug.Log("updatechaseplayerstate");
         agent.SetDestination(playerTransform.position);
+
+
+        lastKnownPlayerPosition = playerTransform.position;
+
 
         Vector2 dirToPlayer = playerTransform.position - transform.position;
 
         float angle = Mathf.Atan2(dirToPlayer.y, dirToPlayer.x) * Mathf.Rad2Deg;
-        transform.rotation = Quaternion.AngleAxis(angle - 90, Vector3.forward);
+        transform.rotation = Quaternion.AngleAxis(angle-90, Vector3.forward);
 
-        float angleToPlayer = Vector2.Angle(transform.up, dirToPlayer);
-        if (angleToPlayer >= viewAngle / 2 || dirToPlayer.magnitude >= viewDistance)
-        {
-            if (currentState == CopState.ChasePlayer)
-            {
-                currentState = CopState.Investigate;
-            }
-        }
-        else
-        {
-            if (currentState == CopState.Investigate)
-            {
-                currentState = CopState.ChasePlayer;
-            }
-        }
     }
 
     private Vector2 lastKnownPlayerPosition;
+    private bool currentlyInvestigating = false;
 
     void UpdateInvestigateState()
     {
         //Debug.Log("updateinvestigatestate");
-        investigatePlayer();
-
-        Vector2 dirToPlayer = playerTransform.position - transform.position;
-        float angleToPlayer = Vector2.Angle(transform.up, dirToPlayer);
-        if (angleToPlayer < viewAngle / 2 && dirToPlayer.magnitude < viewDistance)
-        {
-            currentState = CopState.ChasePlayer;
-            investigationTimer = 0f;
-        }
-        else
-        {
-            investigationTimer += Time.deltaTime;
-
-            if (investigationTimer >= investigationDuration)
-            {
-                currentState = CopState.Patrol;
-                investigationTimer = 0f;
-            }
-        }
+        InvestigateSound(lastKnownPlayerPosition);
+        StartCoroutine(InvestigationPhase(investigationDuration));
+        
     }
 
-    void investigatePlayer()
-    {
-        //Debug.Log("investigating");
-
-        if (currentState == CopState.Investigate)
-        {
-            lastKnownPlayerPosition = playerTransform.position;
-            centrePoint.position = lastKnownPlayerPosition; // Set the center point position to the last known player position
-
+    IEnumerator InvestigationPhase(float investigationDuration) {
+        if (!currentlyInvestigating) {
+            currentlyInvestigating = true;
+            yield return new WaitForSeconds(investigationDuration);
+            currentState = CopState.Patrol;
+            currentlyInvestigating = false;
         }
+    }
+    
+    public void InvestigateSound(Vector2 soundPos) {
+        
+        if (currentState != CopState.Investigate) currentState = CopState.Investigate;
+
+        lastKnownPlayerPosition = soundPos;
+        centrePoint.position = lastKnownPlayerPosition; // Set the center point position to the last known player position
 
         agent.SetDestination(lastKnownPlayerPosition);
 

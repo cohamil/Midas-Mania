@@ -20,7 +20,6 @@ public class Gold : MonoBehaviour
         if (other.transform.tag == "Player") {
             Debug.Log("gold collected");
             GameManager.Instance.PlayerCollectedGold();
-            gameObject.SetActive(false);
         }
     }
 }

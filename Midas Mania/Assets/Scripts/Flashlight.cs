@@ -29,13 +29,13 @@ public class Flashlight : MonoBehaviour
                 //Debug.Log("raycasted something: " + hit.collider.tag);
                 if (hit.collider.tag == "Player")
                 {
-                    Debug.Log("player detected");
+                    //Debug.Log("player detected");
                     enemyScript.ChangeState(CopState.ChasePlayer);
                 }
             }
             else
             {
-                Debug.Log("player detected2");
+                //Debug.Log("player detected2");
                 enemyScript.ChangeState(CopState.ChasePlayer);
             }
         }
@@ -45,7 +45,7 @@ public class Flashlight : MonoBehaviour
     {
         if (other.transform.tag == "Player")
         {
-            enemyScript.ChangeState(CopState.Patrol); // should be investiage state, but patrol for now
+            enemyScript.ChangeState(CopState.Investigate); // should be investiage state, but patrol for now
         }
     }
 }
